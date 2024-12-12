@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Call Status Data</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .message-block {
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+      white-space: pre-wrap;  /* Preserve line breaks */
+      word-wrap: break-word;  /* Break words if they are too long */
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #007BFF;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+    // Establish WebSocket connection to the server
+    const socket = io();
+
+    // Listen for 'newData' event from the server
+    socket.on('newData', function(data) {
+      // Create a new message block element
+      const messageBlock = document.createElement('div');
+      messageBlock.classList.add('message-block');
+      messageBlock.textContent = data;  // Set the message text
+      
+      // Get the container element
+      const container = document.getElementById('messages');
+      
+      // Prepend the new message block to the top of the container
+      container.insertBefore(messageBlock, container.firstChild);
+      
+      // Scroll to the top of the container to show the latest message
+      container.scrollTop = 0;
+    });
+
+    // Function to clear the message container
+    function clearMessages() {
+      document.getElementById('messages').innerHTML = '';  // Clear all messages
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Status Callback Data</h1>
+
+    <!-- Clear Button -->
+    <button onclick="clearMessages()">Clear</button>
+
+    <!-- Container for displaying messages as blocks -->
+    <div id="messages"></div>
+
+  </div>
+</body>
+</html>
