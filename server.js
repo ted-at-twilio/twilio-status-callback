@@ -13,7 +13,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 // TCP Port to listen on 
-const port = 3090; // ORIG: 3000
+const port = 3090; // E.g: 3000 - using 3090 since 3000 is taken by Javascript Voice Client
 
 // Set EJS as the template engine
 app.set('view engine', 'ejs');
