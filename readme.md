@@ -82,38 +82,50 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const bodyParser = require('body-parser');
-const path = require('path');
 
+// Create an instance of the Express app
 const app = express();
+
+// Create an HTTP server to serve the app and handle WebSocket connections
 const server = http.createServer(app);
+
+// Set up socket.io for real-time communication
 const io = socketIo(server);
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// TCP Port to listen on 
+const port = 3090; // E.g: 3000 - using 3090 since 3000 is taken by Javascript Voice Client
 
-// EJS setup
+// Set EJS as the template engine
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
 
-// Basic route rendering the EJS template
+// Middleware to parse JSON bodies (needed for Twilio webhook)
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+let latestData = 'No callback data received yet';
+
+// Handle the POST request from Twilio's callback (status updates)
+app.post('/webhook', (req, res) => {
+  console.log('Received callback data:', req.body);
+
+  // Update the latest data with the received status callback
+  latestData = JSON.stringify(req.body, null, 2);
+
+  // Emit the new data to all connected clients
+  io.emit('newData', latestData);
+
+  // Respond to Twilio's webhook
+  res.status(200).send('<Response></Response>');
+});
+
+// Serve the frontend page
 app.get('/', (req, res) => {
-    res.render('index');
+  res.render('index', { data: latestData });
 });
 
-// Socket.io handling
-io.on('connection', (socket) => {
-    console.log('a user connected');
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
-    });
-});
-
-// Start server
-const port = process.env.PORT || 3000;
+// Start the server on designated TCP port e.g. 3090
 server.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+  console.log('Server is running on http://localhost:' + port);
 });
 ```
 
@@ -122,31 +134,95 @@ server.listen(port, () => {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Socket.io Example</title>
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Call Status Data</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .message-block {
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+      white-space: pre-wrap;  /* Preserve line breaks */
+      word-wrap: break-word;  /* Break words if they are too long */
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #007BFF;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+    // Establish WebSocket connection to the server
+    const socket = io();
+
+    // Listen for 'newData' event from the server
+    socket.on('newData', function(data) {
+      // Create a new message block element
+      const messageBlock = document.createElement('div');
+      messageBlock.classList.add('message-block');
+      messageBlock.textContent = data;  // Set the message text
+      
+      // Get the container element
+      const container = document.getElementById('messages');
+      
+      // Prepend the new message block to the top of the container
+      container.insertBefore(messageBlock, container.firstChild);
+      
+      // Scroll to the top of the container to show the latest message
+      container.scrollTop = 0;
+    });
+
+    // Function to clear the message container
+    function clearMessages() {
+      document.getElementById('messages').innerHTML = '';  // Clear all messages
+    }
+  </script>
 </head>
 <body>
-    <h1>Welcome to Socket.io Example</h1>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        socket.on('connect', () => {
-            console.log('Connected to the server!');
-        });
-    </script>
+  <div class="container">
+    <h1>Status Callback Data</h1>
+
+    <!-- Clear Button -->
+    <button onclick="clearMessages()">Clear</button>
+
+    <!-- Container for displaying messages as blocks -->
+    <div id="messages"></div>
+
+  </div>
 </body>
 </html>
-```
-
-#### **`public/style.css`** (CSS for basic styling):
-```css
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin-top: 50px;
-}
 ```
 
 ### 4. Start the Server
