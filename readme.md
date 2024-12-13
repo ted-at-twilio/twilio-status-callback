@@ -2,6 +2,8 @@
 
 This is a real-time Node.js application that uses **Socket.io** for bidirectional communication between the client and server, with **Express.js** as the web framework and **EJS** as the templating engine. This project also utilizes **ngrok** to expose the local server to the internet, allowing external services (e.g., Twilio) to send data to your local server.
 
+It is intended to provide a destination for Statuscallback data from your Twilio application. I have found this very useful when troubleshooting Voice SDK and other Voice application questions.
+
 ## Prerequisites
 
 - **Node.js** and **npm**: Make sure you have Node.js and npm installed on your system.
