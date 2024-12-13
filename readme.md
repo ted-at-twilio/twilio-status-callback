@@ -266,7 +266,7 @@ Forwarding                    https://abc123.ngrok.io -> http://localhost:3090
 
 Now that your local server is exposed via ngrok, you should be able to interact with your app in real-time. For example, if you're working with **Twilio**, configure it to send HTTP requests to the ngrok URL (e.g., `http://abc123.ngrok.io/webhook`).
 
-## Sample output date
+## Sample output data
 
 ![Screenshot](https://jade-bear-6807.twil.io/assets/statuscallback-readme.png)
 
