@@ -73,7 +73,7 @@ npm install express socket.io body-parser ejs
 Set up the necessary folder structure:
 
 ```bash
-mkdir public views
+mkdir views
 ```
 
 Create the following files:
