@@ -35,7 +35,13 @@ app.post('/webhook', (req, res) => {
   io.emit('newData', latestData);
 
   // Respond to Twilio's webhook
-  res.status(200).send('<Response></Response>');
+  res.status(200).send('<Response><!-- SYNTAX... BEEP --></Response>');
+});
+
+// Handle GET requests to /webhook
+app.get('/webhook', (req, res) => {
+  res.send('This endpoint is used for Twilio webhooks. Use POST to send data.');
+  console.log('GET request received:', req.body);
 });
 
 // Serve the frontend page
