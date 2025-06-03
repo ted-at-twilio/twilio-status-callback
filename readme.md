@@ -120,6 +120,12 @@ app.post('/webhook', (req, res) => {
   res.status(200).send('<Response></Response>');
 });
 
+// Handle GET requests to /webhook
+app.get('/webhook', (req, res) => {
+  res.send('This endpoint is used for Twilio webhooks. Use POST to send data.');
+  console.log('GET request received:', req.body);
+});
+
 // Serve the frontend page
 app.get('/', (req, res) => {
   res.render('index', { data: latestData });
